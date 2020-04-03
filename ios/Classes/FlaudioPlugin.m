@@ -10,6 +10,6 @@
 
 @implementation FlaudioPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  [SwiftFlaudioPlugin registerWithRegistrar:registrar];
+  [SwiftFLAudioPlugin registerWithRegistrar:registrar];
 }
 @end

@@ -18,6 +18,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await Flaudio.platformVersion, '42');
+    expect(await FLAudio.play, '42');
   });
 }
