@@ -12,33 +12,20 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-
   @override
   void initState() {
     super.initState();
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      FLAudio.prepare("YOUR URL");
-      platformVersion = await FLAudio.play;
+      FLAudio.prepare(
+          "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+      // FLAudio.playbackSpeed(4);
     } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      print("error");
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
   }
 
   @override
@@ -49,8 +36,16 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: Text('Testing on: $_platformVersion\n'),
-        ),
+            child: Column(
+          children: <Widget>[
+            FlatButton(onPressed: () => FLAudio.play(), child: Text("Play")),
+            FlatButton(
+                onPressed: () => FLAudio.seek(10), child: Text("Seek forward")),
+            FlatButton(
+                onPressed: () => FLAudio.seek(-10),
+                child: Text("Seek backward"))
+          ],
+        )),
       ),
     );
   }
