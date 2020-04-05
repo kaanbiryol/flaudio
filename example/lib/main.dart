@@ -13,6 +13,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final player = FLAudio();
+  String currentTime = "NOT STARTED";
 
   @override
   void initState() {
@@ -25,7 +26,14 @@ class _MyAppState extends State<MyApp> {
       player.onPlayerStateChanged.listen((state) => {print(state)});
       player.prepare(
           "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
-      // FLAudio.playbackSpeed(4);
+      player.onTick.listen((playerTime) => {
+            this.setState(() => {
+                  this.currentTime =
+                      playerTime.currentTime.inSeconds.toString() +
+                          " : " +
+                          playerTime.duration.inSeconds.toString()
+                })
+          });
     } on PlatformException {
       print("error");
     }
@@ -41,12 +49,20 @@ class _MyAppState extends State<MyApp> {
         body: Center(
             child: Column(
           children: <Widget>[
+            Text(currentTime),
             FlatButton(onPressed: () => player.play(), child: Text("Play")),
             FlatButton(onPressed: () => player.pause(), child: Text("Pause")),
             FlatButton(
                 onPressed: () => player.seek(10), child: Text("Seek forward")),
             FlatButton(
-                onPressed: () => player.seek(-10), child: Text("Seek backward"))
+                onPressed: () => player.seek(-10),
+                child: Text("Seek backward")),
+            Slider(
+                label: "Playback speed",
+                max: 3,
+                min: 0.5,
+                value: 0.5,
+                onChanged: (value) => {player.setPlaybackSpeed(value)})
           ],
         )),
       ),

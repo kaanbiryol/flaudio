@@ -1,8 +1,7 @@
-
 import Foundation
 import AVFoundation
 
-typealias IntHandler = (Int) -> Void
+typealias DurationHandler = (Int, Int) -> Void
 typealias VoidHandler = () -> Void
 
 enum Channel {
@@ -11,18 +10,20 @@ enum Channel {
     static let pause = "pause"
     static let playbackSpeed = "playbackSpeed"
     static let seek = "seek"
+    static let duration = "duration"
 }
 
 enum Event {
     static let onStart = "onStart"
-    static let onPause = "onPause"
+    static let onPause = "onStart"
     static let onTick = "onTick"
 }
 
 
 protocol Playable {
     var player: AVPlayer { get }
-    func prepare(_ urlString: String, onTickHandler: @escaping IntHandler)
+    var duration: Int { get }
+    func prepare(_ urlString: String, onTickHandler: @escaping DurationHandler)
     func play(onPlayHandler: @escaping VoidHandler)
     func pause(onPauseHandler: @escaping VoidHandler)
     func playbackSpeed(to rate: Float)
@@ -30,7 +31,7 @@ protocol Playable {
 }
 
 protocol PlayableEvent {
-    func onTick(_ time: CMTime, _ onTickHandler: IntHandler)
+    func onTick(_ time: CMTime, _ onTickHandler: DurationHandler)
 }
 
 protocol AudioManagerProtocol: Playable, PlayableEvent {}
@@ -44,7 +45,12 @@ public class AudioManager: AudioManagerProtocol {
     var player: AVPlayer = AVPlayer()
     private var timeObserverToken: Any?
     
-    func prepare(_ urlString: String, onTickHandler: @escaping IntHandler) {
+    var duration: Int {
+        guard let currentTime = player.currentItem?.duration else { return 0 }
+        return Int(CMTimeGetSeconds(currentTime))
+    }
+    
+    func prepare(_ urlString: String, onTickHandler: @escaping DurationHandler) {
         removePeriodicTimeObserver()
         guard let url = URL(string: urlString) else { return }
         player = AVPlayer(url: url)
@@ -65,6 +71,7 @@ public class AudioManager: AudioManagerProtocol {
         player.rate = rate
     }
     
+    
     func seek(by seconds: Int) {
         let currentTime = CMTimeGetSeconds(player.currentTime())
         let soughtTime = currentTime + Float64(seconds)
@@ -72,13 +79,13 @@ public class AudioManager: AudioManagerProtocol {
         player.seek(to: time, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
     }
     
-    func onTick(_ time: CMTime, _ onTickHandler: IntHandler) {
+    func onTick(_ time: CMTime, _ onTickHandler: DurationHandler) {
         let second = CMTimeGetSeconds(time)
         guard !second.isNaN, !second.isInfinite else { return }
-        onTickHandler(Int(second))
+        onTickHandler(Int(second), duration)
     }
     
-    private func addPeriodicTimeObserver(_ onTickHandler: @escaping IntHandler) {
+    private func addPeriodicTimeObserver(_ onTickHandler: @escaping DurationHandler) {
         let timeScale = CMTimeScale(NSEC_PER_SEC)
         let time = CMTime(seconds: 0.5, preferredTimescale: timeScale)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: time, queue: .main) { [weak self] time in

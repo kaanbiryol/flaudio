@@ -11,6 +11,7 @@ class ChannelMethod {
   static const pause = "pause";
   static const playbackSpeed = "playbackSpeed";
   static const seek = "seek";
+  static const duration = "duration";
 }
 
 class Event {
@@ -19,10 +20,18 @@ class Event {
   static const onTick = "onTick";
 }
 
+class PlayerTime {
+  Duration currentTime;
+  Duration duration;
+  PlayerTime(this.currentTime, this.duration);
+}
+
 enum PlayerState { PLAYING, PAUSED }
 
 class FLAudio {
   final StreamController<PlayerState> _stateController =
+      new StreamController.broadcast();
+  final StreamController<PlayerTime> _positionController =
       new StreamController.broadcast();
 
   MethodChannel _methodChannel = const MethodChannel('flaudio');
@@ -43,7 +52,7 @@ class FLAudio {
     return await _methodChannel.invokeMethod(ChannelMethod.pause);
   }
 
-  Future<void> playbackSpeed(double speed) async {
+  Future<void> setPlaybackSpeed(double speed) async {
     return await _methodChannel.invokeMethod(
         ChannelMethod.playbackSpeed, speed);
   }
@@ -52,7 +61,13 @@ class FLAudio {
     return await _methodChannel.invokeMethod(ChannelMethod.seek, seconds);
   }
 
+  Future<Duration> get duration async {
+    var seconds = await _methodChannel.invokeMethod(ChannelMethod.duration);
+    return Duration(seconds: seconds);
+  }
+
   Stream<PlayerState> get onPlayerStateChanged => _stateController.stream;
+  Stream<PlayerTime> get onTick => _positionController.stream;
 
   Future<void> _playerStateChanged(MethodCall call) async {
     switch (call.method) {
@@ -63,7 +78,13 @@ class FLAudio {
         _stateController.add(PlayerState.PAUSED);
         break;
       case Event.onTick:
-        print("TODO" + call.arguments.toString());
+        Map argumentsMap = call.arguments;
+        int currentTimeInSeconds = argumentsMap["time"];
+        int durationInSeconds = argumentsMap["duration"];
+        Duration currentTime = Duration(seconds: currentTimeInSeconds);
+        Duration duration = Duration(seconds: durationInSeconds);
+        PlayerTime playerTime = PlayerTime(currentTime, duration);
+        _positionController.add(playerTime);
         break;
       default:
         throw new ArgumentError('not supported channel method ${call.method} ');

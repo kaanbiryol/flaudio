@@ -20,8 +20,8 @@ public class SwiftFLAudioPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case Channel.prepare:
             guard let urlString = arguments as? String else { return }
-            AudioManager.shared.prepare(urlString) { [weak self] (time) in
-                self?.channel.invokeMethod(Event.onTick, arguments: time)
+            AudioManager.shared.prepare(urlString) { [weak self] (currentTime, duration) in
+                self?.channel.invokeMethod(Event.onTick, arguments: ["time": currentTime, "duration": duration])
             }
         case Channel.play:
             AudioManager.shared.play { [weak self] in
@@ -37,6 +37,8 @@ public class SwiftFLAudioPlugin: NSObject, FlutterPlugin {
         case Channel.seek:
             guard let seconds = arguments as? Int else { return }
             AudioManager.shared.seek(by: seconds)
+        case Channel.duration:
+            result(AudioManager.shared.duration)
         default:
             result("not supported channel method: " + call.method)
         }
