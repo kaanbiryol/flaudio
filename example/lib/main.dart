@@ -12,6 +12,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final player = FLAudio();
+
   @override
   void initState() {
     super.initState();
@@ -20,7 +22,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> initPlatformState() async {
     try {
-      FLAudio.prepare(
+      player.onPlayerStateChanged.listen((state) => {print(state)});
+      player.prepare(
           "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
       // FLAudio.playbackSpeed(4);
     } on PlatformException {
@@ -38,12 +41,12 @@ class _MyAppState extends State<MyApp> {
         body: Center(
             child: Column(
           children: <Widget>[
-            FlatButton(onPressed: () => FLAudio.play(), child: Text("Play")),
+            FlatButton(onPressed: () => player.play(), child: Text("Play")),
+            FlatButton(onPressed: () => player.pause(), child: Text("Pause")),
             FlatButton(
-                onPressed: () => FLAudio.seek(10), child: Text("Seek forward")),
+                onPressed: () => player.seek(10), child: Text("Seek forward")),
             FlatButton(
-                onPressed: () => FLAudio.seek(-10),
-                child: Text("Seek backward"))
+                onPressed: () => player.seek(-10), child: Text("Seek backward"))
           ],
         )),
       ),
