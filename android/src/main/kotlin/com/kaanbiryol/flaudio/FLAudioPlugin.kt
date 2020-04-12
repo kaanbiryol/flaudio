@@ -9,10 +9,19 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** FLAudioPlugin */
-public class FLAudioPlugin: FlutterPlugin, MethodCallHandler {
+class FLAudioPlugin: FlutterPlugin, MethodCallHandler {
+
+  private lateinit var channel: MethodChannel
+
+  constructor() {}
+
+  constructor(channel: MethodChannel) {
+    this.channel = channel
+  }
+
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flaudio")
-    channel.setMethodCallHandler(FLAudioPlugin());
+    channel.setMethodCallHandler(FLAudioPlugin(channel));
   }
 
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
@@ -28,44 +37,43 @@ public class FLAudioPlugin: FlutterPlugin, MethodCallHandler {
     @JvmStatic
     fun registerWith(registrar: Registrar) {
       val channel = MethodChannel(registrar.messenger(), "flaudio")
-      channel.setMethodCallHandler(FLAudioPlugin())
+      channel.setMethodCallHandler(FLAudioPlugin(channel))
     }
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-
+    val arguments = call.arguments
     when(call.method) {
-      ChannelMethod.play -> result.success(FLAudioManager.instance.play())
-    }
-
-    if (call.method == "getPlatformVersion") {
-      result.success("Android ${android.os.Build.VERSION.RELEASE}")
-    } else {
-      result.notImplemented()
+      Channel.prepare -> {
+        val urlString = arguments as? String ?: return
+        AudioManager.instance.prepare(urlString, onTickHandler = { currentTime: Int, duration: Int ->
+            channel.invokeMethod(Event.onTick, mapOf("time" to currentTime, "duration" to duration))
+        } )
+      }
+      Channel.play -> {
+        AudioManager.instance.play {
+          channel.invokeMethod(Event.onStart, null)
+        }
+      }
+      Channel.pause -> {
+        AudioManager.instance.pause {
+          channel.invokeMethod(Event.onPause, null)
+        }
+      }
+      Channel.playbackSpeed -> {
+        val speed = arguments as? Float ?: return
+        AudioManager.instance.playbackSpeed(speed)
+      }
+      Channel.seek -> {
+        val seconds = arguments as? Int ?: return
+        AudioManager.instance.seek(seconds)
+      }
+      Channel.duration -> {
+        result.success(AudioManager.instance.duration)
+      }
     }
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
   }
 }
-
-class FLAudioManager: Playable {
-  companion object {
-    val instance = FLAudioManager()
-  }
-
-  override fun play(): String {
-    return "Android"
-  }
-}
-
-interface Playable {
-  fun play(): String
-}
-
-class ChannelMethod {
-  companion object {
-    const val play = "play"
-  }
-}
-

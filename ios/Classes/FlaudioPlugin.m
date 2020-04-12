@@ -8,7 +8,7 @@
 #import "flaudio-Swift.h"
 #endif
 
-@implementation FlaudioPlugin
+@implementation FLAudioPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   [SwiftFLAudioPlugin registerWithRegistrar:registrar];
 }

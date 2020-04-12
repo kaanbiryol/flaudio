@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:flutter/services.dart';
 import 'package:flaudio/flaudio.dart';
+import 'package:example/double+extension.dart';
 
 void main() => runApp(MyApp());
 
@@ -13,7 +13,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final player = FLAudio();
-  String currentTime = "NOT STARTED";
+
+  String currentTimeString = "NOT STARTED";
+  double playbackSpeed = 1.0;
+  int durationInSeconds = 1;
+  double _currentTimeSliderValue = 0;
 
   @override
   void initState() {
@@ -24,11 +28,13 @@ class _MyAppState extends State<MyApp> {
   Future<void> initPlatformState() async {
     try {
       player.onPlayerStateChanged.listen((state) => {print(state)});
-      player.prepare(
-          "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+
       player.onTick.listen((playerTime) => {
             this.setState(() => {
-                  this.currentTime =
+                  this._currentTimeSliderValue =
+                      playerTime.currentTime.inSeconds.toDouble(),
+                  print("KAAN VALUE" + this._currentTimeSliderValue.toString()),
+                  this.currentTimeString =
                       playerTime.currentTime.inSeconds.toString() +
                           " : " +
                           playerTime.duration.inSeconds.toString()
@@ -37,6 +43,14 @@ class _MyAppState extends State<MyApp> {
     } on PlatformException {
       print("error");
     }
+
+    var duration = await player.prepare(
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+    this.durationInSeconds = duration.inSeconds;
+  }
+
+  double currentTimeToSliderValue(int seconds) {
+    return seconds / durationInSeconds;
   }
 
   @override
@@ -49,20 +63,47 @@ class _MyAppState extends State<MyApp> {
         body: Center(
             child: Column(
           children: <Widget>[
-            Text(currentTime),
-            FlatButton(onPressed: () => player.play(), child: Text("Play")),
+            Column(
+              children: <Widget>[
+                Text(currentTimeString),
+                Slider(
+                    max: durationInSeconds.toDouble(),
+                    min: 0,
+                    value: _currentTimeSliderValue,
+                    onChangeEnd: (value) {
+                      player.pause();
+                      print("KAAN" + value.toString());
+                      player.seek(value);
+                    },
+                    onChanged: (value) => {
+                          setState(() {
+                            _currentTimeSliderValue = value;
+                          })
+                        }),
+              ],
+            ),
+            FlatButton(onPressed: () => {player.play()}, child: Text("Play")),
             FlatButton(onPressed: () => player.pause(), child: Text("Pause")),
             FlatButton(
                 onPressed: () => player.seek(10), child: Text("Seek forward")),
             FlatButton(
                 onPressed: () => player.seek(-10),
                 child: Text("Seek backward")),
-            Slider(
-                label: "Playback speed",
-                max: 3,
-                min: 0.5,
-                value: 0.5,
-                onChanged: (value) => {player.setPlaybackSpeed(value)})
+            Column(
+              children: <Widget>[
+                Text("Playback speed" + playbackSpeed.toString()),
+                Slider(
+                    max: 2,
+                    min: 0.5,
+                    value: playbackSpeed,
+                    onChanged: (value) => {
+                          setState(() {
+                            playbackSpeed = value.toPrecision(1);
+                            player.setPlaybackSpeed(playbackSpeed);
+                          })
+                        }),
+              ],
+            )
           ],
         )),
       ),

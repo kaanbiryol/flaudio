@@ -40,8 +40,10 @@ class FLAudio {
     _methodChannel.setMethodCallHandler(_playerStateChanged);
   }
 
-  Future<void> prepare(String url) async {
-    return await _methodChannel.invokeMethod(ChannelMethod.prepare, url);
+  Future<Duration> prepare(String url) async {
+    var duration =
+        await _methodChannel.invokeMethod(ChannelMethod.prepare, url);
+    return Duration(seconds: duration);
   }
 
   Future<void> play() async {

@@ -1,4 +1,4 @@
 #import <Flutter/Flutter.h>
 
-@interface FlaudioPlugin : NSObject<FlutterPlugin>
+@interface FLAudioPlugin : NSObject<FlutterPlugin>
 @end
