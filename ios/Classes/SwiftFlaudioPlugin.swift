@@ -37,8 +37,11 @@ public class SwiftFLAudioPlugin: NSObject, FlutterPlugin {
             guard let speed = arguments as? Float else { return }
             AudioManager.shared.playbackSpeed(to: speed)
         case Channel.seek:
-            guard let seconds = arguments as? Int else { return }
+            guard let seconds = arguments as? Double else { return }
             AudioManager.shared.seek(by: seconds)
+        case Channel.seekTo:
+            guard let seconds = arguments as? Double else { return }
+            AudioManager.shared.seek(to: seconds)
         case Channel.duration:
             result(AudioManager.shared.duration)
         default:

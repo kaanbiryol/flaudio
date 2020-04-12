@@ -11,6 +11,7 @@ class ChannelMethod {
   static const pause = "pause";
   static const playbackSpeed = "playbackSpeed";
   static const seek = "seek";
+  static const seekTo = "seekTo";
   static const duration = "duration";
 }
 
@@ -41,9 +42,9 @@ class FLAudio {
   }
 
   Future<Duration> prepare(String url) async {
-    var duration =
+    double duration =
         await _methodChannel.invokeMethod(ChannelMethod.prepare, url);
-    return Duration(seconds: duration);
+    return Duration(seconds: duration.toInt());
   }
 
   Future<void> play() async {
@@ -63,9 +64,13 @@ class FLAudio {
     return await _methodChannel.invokeMethod(ChannelMethod.seek, seconds);
   }
 
+  Future<void> seekTo(double seconds) async {
+    return await _methodChannel.invokeMethod(ChannelMethod.seekTo, seconds);
+  }
+
   Future<Duration> get duration async {
-    var seconds = await _methodChannel.invokeMethod(ChannelMethod.duration);
-    return Duration(seconds: seconds);
+    double seconds = await _methodChannel.invokeMethod(ChannelMethod.duration);
+    return Duration(seconds: seconds.toInt());
   }
 
   Stream<PlayerState> get onPlayerStateChanged => _stateController.stream;
@@ -81,10 +86,10 @@ class FLAudio {
         break;
       case Event.onTick:
         Map argumentsMap = call.arguments;
-        int currentTimeInSeconds = argumentsMap["time"];
-        int durationInSeconds = argumentsMap["duration"];
-        Duration currentTime = Duration(seconds: currentTimeInSeconds);
-        Duration duration = Duration(seconds: durationInSeconds);
+        double currentTimeInSeconds = argumentsMap["time"];
+        double durationInSeconds = argumentsMap["duration"];
+        Duration currentTime = Duration(seconds: currentTimeInSeconds.toInt());
+        Duration duration = Duration(seconds: durationInSeconds.toInt());
         PlayerTime playerTime = PlayerTime(currentTime, duration);
         _positionController.add(playerTime);
         break;

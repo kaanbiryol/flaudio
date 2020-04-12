@@ -6,6 +6,8 @@ protocol AVPlayerObserverProtocol {
     var playerItem: AVPlayerItem? { get }
     var timeObserverToken: Any? { get }
     func addObserver(to playerItem: AVPlayerItem)
+    func addPeriodicTimeObserver(to player: AVPlayer, _ onTickHandler: @escaping DurationHandler)
+    func removePeriodicTimeObserver(from player: AVPlayer)
     func dispose(_ player: AVPlayer)
 }
 
@@ -50,7 +52,7 @@ class AVPlayerObserver: NSObject, AVPlayerObserverProtocol {
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: time, queue: .main) { time in
             let second = CMTimeGetSeconds(time)
             guard !second.isNaN, !second.isInfinite else { return }
-            onTickHandler(Int(second), player.duration)
+            onTickHandler(second, player.duration)
         }
     }
     

@@ -3,9 +3,9 @@ import AVFoundation
 
 extension AVPlayer {
     
-    var duration: Int {
+    var duration: Double {
         guard let currentTime = currentItem?.duration, !currentTime.isIndefinite else { return 0 }
-        return Int(CMTimeGetSeconds(currentTime))
+        return CMTimeGetSeconds(currentTime)
     }
     
     convenience init(customURL: URL, observer: AVPlayerObserverProtocol) {

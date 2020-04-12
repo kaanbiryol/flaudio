@@ -28,12 +28,10 @@ class _MyAppState extends State<MyApp> {
   Future<void> initPlatformState() async {
     try {
       player.onPlayerStateChanged.listen((state) => {print(state)});
-
       player.onTick.listen((playerTime) => {
             this.setState(() => {
                   this._currentTimeSliderValue =
                       playerTime.currentTime.inSeconds.toDouble(),
-                  print("KAAN VALUE" + this._currentTimeSliderValue.toString()),
                   this.currentTimeString =
                       playerTime.currentTime.inSeconds.toString() +
                           " : " +
@@ -47,6 +45,7 @@ class _MyAppState extends State<MyApp> {
     var duration = await player.prepare(
         "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
     this.durationInSeconds = duration.inSeconds;
+    print("duration" + durationInSeconds.toString());
   }
 
   double currentTimeToSliderValue(int seconds) {
@@ -71,9 +70,7 @@ class _MyAppState extends State<MyApp> {
                     min: 0,
                     value: _currentTimeSliderValue,
                     onChangeEnd: (value) {
-                      player.pause();
-                      print("KAAN" + value.toString());
-                      player.seek(value);
+                      player.seekTo(value);
                     },
                     onChanged: (value) => {
                           setState(() {
