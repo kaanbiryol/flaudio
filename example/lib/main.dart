@@ -80,7 +80,7 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             FlatButton(onPressed: () => {player.play()}, child: Text("Play")),
-            FlatButton(onPressed: () => player.dispose(), child: Text("Pause")),
+            FlatButton(onPressed: () => player.pause(), child: Text("Pause")),
             FlatButton(
                 onPressed: () => player.seek(10), child: Text("Seek forward")),
             FlatButton(
