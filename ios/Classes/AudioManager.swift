@@ -14,6 +14,7 @@ enum Channel {
     static let seek = "seek"
     static let seekTo = "seekTo"
     static let duration = "duration"
+    static let dispose = "dispose"
 }
 
 enum Event {
@@ -98,6 +99,8 @@ public class AudioManager: AudioManagerProtocol {
     }
     
     func dispose() {
+        player.pause()
+        player.replaceCurrentItem(with: nil)
         observer.dispose(player)
     }
 

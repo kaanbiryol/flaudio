@@ -44,6 +44,9 @@ public class SwiftFLAudioPlugin: NSObject, FlutterPlugin {
             AudioManager.shared.seek(to: seconds)
         case Channel.duration:
             result(AudioManager.shared.duration)
+        case Channel.dispose:
+            AudioManager.shared.dispose()
+            result(nil)
         default:
             result("not supported channel method: " + call.method)
         }

@@ -42,7 +42,7 @@ class _MyAppState extends State<MyApp> {
       print("error");
     }
 
-    var duration = await player.prepare(
+    Duration duration = await player.prepare(
         "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
     this.durationInSeconds = duration.inSeconds;
     print("duration" + durationInSeconds.toString());
@@ -80,7 +80,7 @@ class _MyAppState extends State<MyApp> {
               ],
             ),
             FlatButton(onPressed: () => {player.play()}, child: Text("Play")),
-            FlatButton(onPressed: () => player.pause(), child: Text("Pause")),
+            FlatButton(onPressed: () => player.dispose(), child: Text("Pause")),
             FlatButton(
                 onPressed: () => player.seek(10), child: Text("Seek forward")),
             FlatButton(
@@ -105,5 +105,11 @@ class _MyAppState extends State<MyApp> {
         )),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    player.dispose();
+    super.dispose();
   }
 }

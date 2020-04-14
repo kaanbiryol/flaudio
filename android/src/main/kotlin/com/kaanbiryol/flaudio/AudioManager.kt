@@ -18,6 +18,7 @@ class Channel {
         const val seek = "seek"
         const val seekTo = "seekTo"
         const val duration = "duration"
+        const val dispose = "dispose"
     }
 }
 
@@ -88,7 +89,10 @@ class AudioManager : Playable {
     override fun seekTo(seconds: Double) {
         player.seekTo((seconds * 1000).toInt())
     }
+
     override fun dispose() {
+        player.stop()
+        player.release()
         streamTimer.cancel()
         streamTimer.purge()
     }

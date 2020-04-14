@@ -81,6 +81,10 @@ class FLAudioPlugin : FlutterPlugin, MethodCallHandler {
             Channel.duration -> {
                 result.success(AudioManager.instance.duration)
             }
+            Channel.dispose -> {
+                AudioManager.instance.dispose()
+                result.success(null)
+            }
         }
     }
 

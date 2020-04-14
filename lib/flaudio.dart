@@ -13,6 +13,7 @@ class ChannelMethod {
   static const seek = "seek";
   static const seekTo = "seekTo";
   static const duration = "duration";
+  static const dispose = "dispose";
 }
 
 class Event {
@@ -71,6 +72,10 @@ class FLAudio {
   Future<Duration> get duration async {
     double seconds = await _methodChannel.invokeMethod(ChannelMethod.duration);
     return Duration(seconds: seconds.toInt());
+  }
+
+  Future<void> dispose() async {
+    return await _methodChannel.invokeMethod(ChannelMethod.dispose);
   }
 
   Stream<PlayerState> get onPlayerStateChanged => _stateController.stream;
